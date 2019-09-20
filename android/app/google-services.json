@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "558161133303",
+    "firebase_url": "https://shopquick-20.firebaseio.com",
+    "project_id": "shopquick-20",
+    "storage_bucket": "shopquick-20.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:558161133303:android:5119908c61dc75f01f5df2",
+        "android_client_info": {
+          "package_name": "com.shopquick"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "558161133303-msent7mi537k5crol0of2ah8vdj1638n.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.shopquick",
+            "certificate_hash": "7f6ab84d61d7c46fa51e162d06fe902d8753fd9c"
+          }
+        },
+        {
+          "client_id": "558161133303-26e41jdi4jppbed55cniav0b5ca3jan8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDATGpNFUbD0F3yYW-WmqhwlnnUYtyMsKU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "558161133303-26e41jdi4jppbed55cniav0b5ca3jan8.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
