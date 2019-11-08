@@ -1,0 +1,13 @@
+diff --git a/node_modules/react-native-selectmultiple-button/libraries/SelectMultipleButton.js b/node_modules/react-native-selectmultiple-button/libraries/SelectMultipleButton.js
+index f9ee610..852b817 100644
+--- a/node_modules/react-native-selectmultiple-button/libraries/SelectMultipleButton.js
++++ b/node_modules/react-native-selectmultiple-button/libraries/SelectMultipleButton.js
+@@ -78,7 +78,7 @@ export default class SelectMultipleButton extends Component {
+     })
+   }
+ 
+-  componentWillReceiveProps(nextProps) {
++  UNSAFE_componentWillReceiveProps(nextProps) {
+     if (this.props.selected !== nextProps.selected) {
+       this.setState({
+         selected: nextProps.selected

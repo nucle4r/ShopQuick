@@ -136,6 +136,7 @@ const MiddleStack = createStackNavigator(
   },
   {
     initialRouteName: 'CompleteProfile',
+    headerMode: 'none',
   },
 );
 const AuthStack = createStackNavigator({

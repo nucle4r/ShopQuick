@@ -39,7 +39,7 @@ export default class HomeScreen extends Component {
             marginTop: StatusBar.currentHeight,
           }}>
           <StatusBar
-            backgroundColor={'transparent'}
+            backgroundColor={'#fff'}
             barStyle={'dark-content'}
             translucent
           />

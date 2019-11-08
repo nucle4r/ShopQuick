@@ -17,6 +17,7 @@ import {
   statusCodes,
 } from 'react-native-google-signin';
 import firebase from 'react-native-firebase';
+import Loader from 'react-native-modal-loader';
 
 export default class SignInScreen extends Component {
   static navigationOptions = {
@@ -28,6 +29,7 @@ export default class SignInScreen extends Component {
     password: '',
     errorMessage: null,
     loggedUID: null,
+    isLoading: false,
   };
   componentDidMount = async () => {
     GoogleSignin.configure({
@@ -41,13 +43,13 @@ export default class SignInScreen extends Component {
     if (userdata !== null) {
       this.props.navigation.navigate('AuthStack');
     } else {
-      firebase
+      await firebase
         .firestore()
         .collection('users')
         .doc(uid)
         .get()
-        .then(async doc => {
-          await AsyncStorage.setItem(
+        .then(doc => {
+          AsyncStorage.setItem(
             'USERDATA',
             JSON.stringify({
               id: doc.id,
@@ -59,13 +61,14 @@ export default class SignInScreen extends Component {
               favCats: doc.data().favCats,
             }),
           );
-        })
-        .then(this.props.navigation.navigate('AuthStack'));
+        });
+      this.props.navigation.navigate('AuthLoading');
     }
   };
 
   handleLogin = () => {
     const {email, password} = this.state;
+    this.setState({isLoading: true});
 
     firebase
       .auth()
@@ -80,7 +83,9 @@ export default class SignInScreen extends Component {
           }),
           await this.storeUser(result.user.uid);
       })
-      .catch(error => this.setState({errorMessage: error.message}));
+      .catch(error =>
+        this.setState({errorMessage: error.message, isLoading: false}),
+      );
   };
   //   facebookLogin = async () => {
   //     try {
@@ -129,7 +134,7 @@ export default class SignInScreen extends Component {
   _googleLogin = async () => {
     try {
       // add any configuration settings here:
-
+      this.setState({isLoading: true});
       await GoogleSignin.hasPlayServices();
       console.log('hello');
 
@@ -173,16 +178,18 @@ export default class SignInScreen extends Component {
               await this.storeUser(result.user.uid);
           }
         })
-        .catch(error => this.setState({errorMessage: error.message}));
+        .catch(error =>
+          this.setState({errorMessage: error.message, isLoadinG: false}),
+        );
     } catch (error) {
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-        // user cancelled the login flow
+        this.setState({isLoading: false});
       } else if (error.code === statusCodes.IN_PROGRESS) {
         // operation (f.e. sign in) is in progress already
       } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-        // play services not available or outdated
+        this.setState({isLoading: false});
       } else {
-        // some other error happened
+        this.setState({isLoading: false});
       }
     }
   };
@@ -191,6 +198,7 @@ export default class SignInScreen extends Component {
     LayoutAnimation.easeInEaseOut();
     return (
       <View style={styles.container}>
+        <Loader loading={this.state.isLoading} color="#ff66be" />
         <ScrollView>
           <Text style={styles.greeting}>{`Hello again.\nWelcome back.`}</Text>
 

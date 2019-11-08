@@ -22,19 +22,54 @@ import ValidationComponent from 'react-native-form-validator';
 import {CommentLoader} from './LoaderComponent';
 import firebase from 'react-native-firebase';
 import Icon from 'react-native-vector-icons/FontAwesome5';
+import AsyncStorage from '@react-native-community/async-storage';
 
 export default class CommentsComponent extends ValidationComponent {
   state = {
+    userData: {},
     comment: '',
     comments: [],
     showingComments: false,
   };
   prodID = this.props.prodID;
-  userID = 'blaMGd6MYqD88OlAjcV6';
-  CommentsRef = firebase.firestore().collection('comments');
+  USER_ID = '';
+  COMMENTS_REF = firebase.firestore().collection('comments');
+  USERS_REF = firebase.firestore().collection('users');
+
+  componentDidMount = async () => {
+    try {
+      const value = await AsyncStorage.getItem('USERDATA');
+      if (value !== null) {
+        let user = JSON.parse(value);
+        this.setState({userData: user});
+        this.USER_ID = user.id;
+      }
+    } catch (error) {
+      Alert.alert('Something Went Wrong!');
+    }
+  };
+
+  promisedSetState = async newState => {
+    return new Promise(resolve => {
+      this.setState(newState, () => {
+        resolve();
+      });
+    });
+  };
+
+  userInfo = async id => {
+    return this.USERS_REF.doc(`${id}`)
+      .get()
+      .then(doc => {
+        return {
+          userName: `${doc.data().first_name + ' ' + doc.data().last_name}`,
+          userAvatar: doc.data().profile_picture,
+        };
+      });
+  };
 
   fetchComments = async () => {
-    query = await this.CommentsRef.orderBy('timeStamp', 'desc')
+    await this.COMMENTS_REF.orderBy('timeStamp', 'desc')
       .where('prodID', '==', `${this.prodID}`)
       .get()
       .then(snapshot => {
@@ -43,17 +78,23 @@ export default class CommentsComponent extends ValidationComponent {
           this.setState({loading: false});
           return;
         }
-        snapshot.forEach(doc => {
+        snapshot.forEach(async doc => {
+          const userInfo = await this.userInfo(doc.data().userID);
+
           this.state.comments.push({
             id: doc.id,
             prodID: doc.data().prodID,
             userID: doc.data().userID,
+            userName: userInfo.userName,
+            userAvatar: userInfo.userAvatar,
             comment: doc.data().comment,
             timeStamp: `${doc.data().timeStamp}`,
             likesCount: doc.data().likesCount,
           });
+          if (snapshot.size == this.state.comments.length) {
+            this.setState({loading: false});
+          }
         });
-        this.setState({loading: false});
       })
       .catch(err => {
         console.log('Error getting documents', err);
@@ -82,14 +123,12 @@ export default class CommentsComponent extends ValidationComponent {
       comment: {minlength: 5, maxlength: 100, required: true},
     });
     if (this.isFormValid()) {
-      this.CommentsRef.add({
+      this.COMMENTS_REF.add({
         prodID: this.prodID,
-        userID: this.userID,
+        userID: this.USER_ID,
         comment: this.state.comment,
         timeStamp: firebase.firestore.FieldValue.serverTimestamp(),
         likesCount: 0,
-        userName: '',
-        userAvatar: '',
       }).then(
         await this.incrementCount(this.prodID),
         this.setState({
@@ -118,13 +157,12 @@ export default class CommentsComponent extends ValidationComponent {
               <Thumbnail
                 small
                 source={{
-                  uri:
-                    'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png',
+                  uri: `${item.userAvatar}`,
                 }}
               />
             </Left>
             <Body>
-              <Text style={{color: '#000'}}>Kumar Pratik</Text>
+              <Text style={{color: '#000'}}>{item.userName}</Text>
               <Text note>{item.comment}</Text>
             </Body>
             <Right>
@@ -150,8 +188,7 @@ export default class CommentsComponent extends ValidationComponent {
           <Thumbnail
             small
             source={{
-              uri:
-                'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png',
+              uri: `${this.state.userData.profile_picture}`,
             }}
           />
           <Item rounded style={styles.formItem}>

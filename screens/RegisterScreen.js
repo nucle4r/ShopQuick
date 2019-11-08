@@ -11,7 +11,7 @@ import {
 import AsyncStorage from '@react-native-community/async-storage';
 import Icon from 'react-native-vector-icons/Ionicons';
 import firebase from 'react-native-firebase';
-import {} from 'react-native-gesture-handler';
+import Loader from 'react-native-modal-loader';
 
 export default class RegisterScreen extends React.Component {
   static navigationOptions = {
@@ -24,6 +24,7 @@ export default class RegisterScreen extends React.Component {
     email: '',
     password: '',
     errorMessage: null,
+    isLoading: false,
   };
   avatarThumbnail =
     'https://firebasestorage.googleapis.com/v0/b/shopquick-20.appspot.com/o/assets%2Favatar.png?alt=media&token=20a9835f-07c2-41dd-af66-ecf821ecc70a';
@@ -33,13 +34,13 @@ export default class RegisterScreen extends React.Component {
     if (userdata !== null) {
       this.props.navigation.navigate('AuthStack');
     } else {
-      firebase
+      await firebase
         .firestore()
         .collection('users')
         .doc(uid)
         .get()
-        .then(async doc => {
-          await AsyncStorage.setItem(
+        .then(doc => {
+          AsyncStorage.setItem(
             'USERDATA',
             JSON.stringify({
               id: doc.id,
@@ -51,12 +52,13 @@ export default class RegisterScreen extends React.Component {
               favCats: doc.data().favCats,
             }),
           );
-        })
-        .then(this.props.navigation.navigate('AuthStack'));
+        });
+      this.props.navigation.navigate('AuthLoading');
     }
   };
 
   handleSignUp = async () => {
+    this.setState({isLoading: true});
     firebase
       .auth()
       .createUserWithEmailAndPassword(this.state.email, this.state.password)
@@ -79,12 +81,15 @@ export default class RegisterScreen extends React.Component {
             }),
           await this.storeUser(userCredentials.user.uid);
       })
-      .catch(error => this.setState({errorMessage: error.message}));
+      .catch(error =>
+        this.setState({errorMessage: error.message, isLoading: false}),
+      );
   };
 
   render() {
     return (
       <View style={styles.container}>
+        <Loader loading={this.state.isLoading} color="#ff66be" />
         <ScrollView>
           <TouchableOpacity
             style={styles.back}

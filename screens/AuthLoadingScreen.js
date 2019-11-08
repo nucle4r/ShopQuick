@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {ActivityIndicator, StyleSheet, View} from 'react-native';
+import {ActivityIndicator, StyleSheet, View, Alert} from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 import firebase from 'react-native-firebase';
 
@@ -11,7 +11,7 @@ export default class AuthLoadingScreen extends Component {
         if (userdata !== null) {
           let data = JSON.parse(userdata);
           if (data.gender == null) {
-            this.props.navigation.navigate('Middle');
+            this.props.navigation.navigate('Middle', {userID: "user.uid"});
           } else {
             this.props.navigation.navigate('App');
           }
